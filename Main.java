@@ -1,100 +1,101 @@
 package com.company;
 
-import com.sun.deploy.xml.GeneralEntity;
-
-import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Main {
-    static void fillRandom(ArrayList<Integer> mas, int left, int right, int qty) {
+    static void createDeck( ArrayList<Integer> fdeck){
+        for(int k=0; k<4; k++){
+            for (int i=1; i<=9; i++){
+           fdeck.add(i);
+       }
+       for(int i=0; i<4; i++){
+           fdeck.add(10);
+       }
+     }
+    }
+    static void shuffleDeck(ArrayList<Integer> fdeck){
         Random gen = new Random();
-        for (int i = 0; i < qty; i++) {
-            mas.add(gen.nextInt(right - left + 1) + left);
+        for(int i=0; i< fdeck.size()-1; i++){
+            int randomIndex = gen.nextInt(fdeck.size()-(i+1))+(i+1);
+            int temp = fdeck.get(i);
+            fdeck.set(i,fdeck.get(randomIndex));
+            fdeck.set(randomIndex, temp);
         }
+    }
+    static void  playerTurn(ArrayList<Integer> fdeck, ArrayList<Integer> fplayer){
+        // игрок по желанию берет карты из колоды
+        Scanner in= new Scanner(System.in);
+        int answer = 1;
+        do {
+           playerTakeOneCard(fdeck, fplayer);
+            //подсчитать сколько у игрока очков и выдать результат
+            int playerScore = calcScore(fplayer);
+            System.out.println();
+            if(playerScore >=21) break;
+            else{
+                System.out.println();
+                answer = in.nextInt();
+            }
+            System.out.println("У вас " + playerScore + "очков");
+            if (playerScore >=21) break;
+            System.out.println("Хотите ли взять еще одну карту? 1 - да, любая цифра - нет");
+            answer = in.nextInt();
+        }while(answer == 1);
+    }
+    static void playerTakeOneCard(ArrayList<Integer> fdeck, ArrayList<Integer> fplayer){
+        //взять карту из колоды
+        int card = fdeck.get(fdeck.size() - 1);
+        //удалить карту из колоды
+        fdeck.remove(fdeck.size() - 1);
+        //добавить эту карту игроку
+        fplayer.add(card);
+    }
+    static int calcScore(ArrayList<Integer> fplayer){
+        int sum = 0;
+        for(int i=0; i<fplayer.size(); i++) {
+            sum += fplayer.get(i);
+        }
+        return sum;
     }
 
-    static void print(ArrayList<Integer> mas) {
-        for (int i = 0; i < mas.size(); i++) {
-            System.out.print(mas.get(i) + "");
+    public static void main(String[] args) {
+        // создать новую колоду.
+        final int deckSize = 52;
+        ArrayList<Integer> deck = new ArrayList<>();
+        createDeck(deck);
+        // перетасовать колоду.
+        shuffleDeck(deck);
+        // создать игроков
+        ArrayList<Integer> player = new ArrayList<>();
+        // создать дилера
+        ArrayList<Integer> dealer = new ArrayList<>();
+        // ========действие игрока========
+        playerTurn(deck, player);
+        //проверка результатов действий игрока
+        //1. Игрок набрал 21 очко, игра заканчивается, игрок победил
+        if (calcScore(player) == 21){
+            System.out.println("Игрок выиграл. Конец игры. Поздравляем победителя");
+            return;
         }
-        System.out.println();
-    }
-    static int findPostMin(ArrayList<Integer> mas){
-        int posMin = -1;
-        if(mas.size() == 0) return posMin;
-        int min = mas.get(0);
-        for(int i = 0; i < mas.size(); i++){
-            if(mas.get(i) <  min){
-                min = mas.get(i);// аналогия для массива mas[i];
-                posMin = i;
-            }
+        //2. Игрок набрал меньше 21 очка, игрок сказал хватит.
+        if (calcScore(player) < 21){
+            System.out.println("Игрок Проиграл. Конец игры. Удачи в следующий раз");
+            return;
         }
-        return posMin;
-    }
-    static int findPostMax(ArrayList<Integer> mas){
-        int posMax = -1;
-        if(mas.size() == 0) return posMax;
-        int max = mas.get(0);
-        for(int i = 0; i < mas.size(); i++){
-            if(mas.get(i) >  max){
-                max = mas.get(i);// аналогия для массива mas[i];
-                posMax = i;
-            }
+        //3. Игрок набрал больше 21 очка, игра заканчивается, игрок проиграл.
+        if (calcScore(player) > 21){
+            System.out.println("Игрок проиграл. Конец игры. Удачи в следующий раз");
+            return;
         }
-        return posMax;
-    }
-    static void swap(ArrayList<Integer> mas, int index1, int index2){
-        int temp =  mas.get(index1);//temp = mas[index1]
-        mas.set(index1, mas.get(index2));//mas[index1] = mas[index2]
-        mas.set(index2, temp);//mas[index2] = temp
-    }
-    static void initDeck(ArrayList<Integer> deck) {
-        for (int k = 0; k < 4; k++) {
-            for (int i = 1; i < 10; i++) {
-                deck.add(i);
-            }
-            for (int i = 1; i < 4; i++) {
-                deck.add(10);
-            }
-        }
-    }
-    static void shuffleDeck(ArrayList<Integer> deck) {
-        Random gen = new Random();
-        for (int k = 0; k < 3; k++) {
-            for (int i = 0; i < deck.size(); i++) {
-                int randomIndex = gen.nextInt(deck.size());
-                swap(deck, i, randomIndex);
-            }
-        }
-    }
-    static void summaRandom(ArrayList<Integer> summa, int left, int right, int qty) {
-        for (int i = 0; i < qty; i++) {
-            summa.add(summa.nextInt(right - left + 1) + left);
-        }
-    }
-        public static void main (String[]args){
-           /* ArrayList<Integer> arr = new ArrayList<>();
-            fillRandom(arr, -10, 10, 15);
-            print(arr);
-            // Найти позицию минимального элемента
-            System.out.println(findPostMin(arr));
-            //найти позицию максимального элемента
-            System.out.println(findPostMax(arr));
-            //Поменять min max местами
-            swap(arr, findPostMin(arr), findPostMax(arr));
-            print(arr);*/
-            ArrayList <Integer> deck = new ArrayList<>();
-            initDeck(deck);
-            print(deck);
-            shuffleDeck(deck);
-            print(deck);
-            // Series 1. Даны десять вещественных чисел. Найти их сумму
-            ArrayList<Integer> summa = new ArrayList<>()
-            fillRandom(summa, -10, 10, 15);
-            print(summa);
-            //Series 2. Даны десять вещественных чисел. Найти их произведение.
+        // ======== проверка результатов действий дилера========
+        //1. Дилер набрал 21 очко(у игрока заведомо <21) , игра заканчивается, Дилер победил
+        //2. Дилер набрал меньше 21 очка, игрок сказал хватит.
+        //3. Дилер набрал больше 21 очка, игра заканчивается, Дилер проиграл.
+        //3.1. У игрока больше очков, чем у дилера - выиграл игрок.
+        //3.2. У Дилера больше очков, чем у дилера - выиграл Дилер.
+        //3.3. У обоих поровну очков - ничья.
 
-        }
     }
-
+}
